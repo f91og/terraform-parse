@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terraform-parse
+  labels:
+    app: terraform-parse
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: terraform-parse
+  template:
+    metadata:
+      labels:
+        app: terraform-parse
+    spec:
+      containers:
+        - name: terraform-parse
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000

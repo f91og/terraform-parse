@@ -60,10 +60,40 @@ curl -X POST http://localhost:8000/render \
 - `tests/` # unit tests
 - `uv.lock` # dependency lock file
 
-## Testing
+## Run test cases
 
 ```bash
 uv run pytest
+```
+
+## Local Testing with Kind
+```
+# 1 Create Kubernetes cluster
+kind create cluster --name tripla-test
+
+# 2 Build Docker image under folder root
+export IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+docker build -t terraform-parse:$IMAGE_TAG terraform_parse_service
+
+
+### 3 Load image into kind or push to your image repository
+kind load docker-image terraform-parse:$IMAGE_TAG --name tripla-test
+
+### 4 Deploy Helm chart
+helm lint ./helm
+helm install terraform-parse ./helm \
+  --set image.repository=terraform-parse \
+  --set image.tag=$IMAGE_TAG
+
+### 5 Verify deployment
+kubectl get pods
+kubectl get svc
+
+### 6 Access the API
+kubectl port-forward svc/terraform-parse 8000:8000
+
+Then open:
+http://localhost:8000/docs
 ```
 
 ## Notes
