@@ -10,7 +10,7 @@ def test_render_s3_terraform():
             "properties": {
                 "aws_region": "eu-west-1",
                 "acl": "private",
-                "bucket_name": "tripla-bucket"
+                "bucket_name": "tripla-bucket",
             }
         }
     }
@@ -18,10 +18,42 @@ def test_render_s3_terraform():
     response = client.post("/render", json=payload)
 
     assert response.status_code == 200
-
     data = response.json()
-    terraform = data["terraform"]
 
-    assert 'provider "aws"' in terraform
-    assert 'bucket = "tripla-bucket"' in terraform
-    assert 'acl    = "private"' in terraform
+    assert 'provider "aws"' in data["terraform"]
+    assert 'bucket = "tripla-bucket"' in data["terraform"]
+    assert 'acl    = "private"' in data["terraform"]
+
+
+def test_invalid_acl():
+    payload = {
+        "payload": {
+            "properties": {
+                "aws_region": "eu-west-1",
+                "acl": "invalid-acl",
+                "bucket_name": "tripla-bucket",
+            }
+        }
+    }
+
+    response = client.post("/render", json=payload)
+
+    assert response.status_code == 400
+    assert "Invalid ACL" in response.json()["detail"]
+
+
+def test_invalid_bucket_name():
+    payload = {
+        "payload": {
+            "properties": {
+                "aws_region": "eu-west-1",
+                "acl": "private",
+                "bucket_name": "INVALID_BUCKET_NAME",
+            }
+        }
+    }
+
+    response = client.post("/render", json=payload)
+
+    assert response.status_code == 400
+    assert "Invalid S3 bucket name" in response.json()["detail"]

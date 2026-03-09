@@ -1,7 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import re
 
 app = FastAPI()
+
+VALID_ACLS = {
+    "private",
+    "public-read",
+    "public-read-write",
+    "authenticated-read",
+}
+
+BUCKET_RE = re.compile(r"^[a-z0-9.-]{3,63}$")
 
 
 class Properties(BaseModel):
@@ -18,9 +28,19 @@ class RenderRequest(BaseModel):
     payload: Payload
 
 
+def validate_inputs(bucket_name: str, acl: str):
+    if acl not in VALID_ACLS:
+        raise HTTPException(status_code=400, detail="Invalid ACL value")
+
+    if not BUCKET_RE.match(bucket_name):
+        raise HTTPException(status_code=400, detail="Invalid S3 bucket name")
+
+
 @app.post("/render")
 def render(request: RenderRequest):
     props = request.payload.properties
+
+    validate_inputs(props.bucket_name, props.acl)
 
     terraform = f"""
 provider "aws" {{
