@@ -37,9 +37,9 @@ curl -X POST http://localhost:8000/render \
   -d '{
         "payload": {
           "properties": {
-            "aws_region": "ap-southeast-1",
+            "aws-region": "ap-southeast-1",
             "acl": "private",
-            "bucket_name": "my-generated-bucket"
+            "bucket-name": "my-generated-bucket"
           }
         }
       }'

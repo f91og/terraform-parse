@@ -8,9 +8,9 @@ def test_render_s3_terraform():
     payload = {
         "payload": {
             "properties": {
-                "aws_region": "eu-west-1",
+                "aws-region": "eu-west-1",
                 "acl": "private",
-                "bucket_name": "tripla-bucket",
+                "bucket-name": "tripla-bucket",
             }
         }
     }
@@ -29,9 +29,9 @@ def test_invalid_acl():
     payload = {
         "payload": {
             "properties": {
-                "aws_region": "eu-west-1",
+                "aws-region": "eu-west-1",
                 "acl": "invalid-acl",
-                "bucket_name": "tripla-bucket",
+                "bucket-name": "tripla-bucket",
             }
         }
     }
@@ -46,9 +46,9 @@ def test_invalid_bucket_name():
     payload = {
         "payload": {
             "properties": {
-                "aws_region": "eu-west-1",
+                "aws-region": "eu-west-1",
                 "acl": "private",
-                "bucket_name": "INVALID_BUCKET_NAME",
+                "bucket-name": "INVALID_BUCKET_NAME",
             }
         }
     }

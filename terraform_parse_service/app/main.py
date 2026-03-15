@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 import re
 
 app = FastAPI()
@@ -15,9 +15,11 @@ BUCKET_RE = re.compile(r"^[a-z0-9.-]{3,63}$")
 
 
 class Properties(BaseModel):
-    aws_region: str
+    model_config = ConfigDict(populate_by_name=True)
+
+    aws_region: str = Field(alias="aws-region")
     acl: str
-    bucket_name: str
+    bucket_name: str = Field(alias="bucket-name")
 
 
 class Payload(BaseModel):
