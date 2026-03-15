@@ -14,6 +14,7 @@ VALID_ACLS = {
 }
 
 BUCKET_RE = re.compile(r"^[a-z0-9.-]{3,63}$")
+IP_LIKE_RE = re.compile(r"^\d+\.\d+\.\d+\.\d+$")
 
 
 class Properties(BaseModel):
@@ -37,6 +38,15 @@ def validate_inputs(bucket_name: str, acl: str):
         raise HTTPException(status_code=400, detail="Invalid ACL value")
 
     if not BUCKET_RE.match(bucket_name):
+        raise HTTPException(status_code=400, detail="Invalid S3 bucket name")
+
+    if bucket_name[0] in ".-" or bucket_name[-1] in ".-":
+        raise HTTPException(status_code=400, detail="Invalid S3 bucket name")
+
+    if ".." in bucket_name or ".-" in bucket_name or "-." in bucket_name:
+        raise HTTPException(status_code=400, detail="Invalid S3 bucket name")
+
+    if IP_LIKE_RE.match(bucket_name):
         raise HTTPException(status_code=400, detail="Invalid S3 bucket name")
 
 

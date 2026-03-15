@@ -57,3 +57,28 @@ def test_invalid_bucket_name():
 
     assert response.status_code == 400
     assert "Invalid S3 bucket name" in response.json()["detail"]
+
+
+def test_bucket_name_edge_cases():
+    invalid_names = [
+        "-leadingdash",
+        "trailingdot.",
+        "double..dots",
+        "dot.-combo",
+        "192.168.0.1",
+    ]
+
+    for name in invalid_names:
+        payload = {
+            "payload": {
+                "properties": {
+                    "aws-region": "eu-west-1",
+                    "acl": "private",
+                    "bucket-name": name,
+                }
+            }
+        }
+        response = client.post("/render", json=payload)
+
+        assert response.status_code == 400
+        assert "Invalid S3 bucket name" in response.json()["detail"]
