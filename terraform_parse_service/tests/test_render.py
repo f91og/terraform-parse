@@ -18,11 +18,11 @@ def test_render_s3_terraform():
     response = client.post("/render", json=payload)
 
     assert response.status_code == 200
-    data = response.json()
+    body = response.text
 
-    assert 'provider "aws"' in data["terraform"]
-    assert 'bucket = "tripla-bucket"' in data["terraform"]
-    assert 'acl    = "private"' in data["terraform"]
+    assert 'provider "aws"' in body
+    assert 'bucket = "tripla-bucket"' in body
+    assert 'acl    = "private"' in body
 
 
 def test_invalid_acl():

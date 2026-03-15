@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict, Field
 import re
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel, ConfigDict, Field
 
 app = FastAPI()
 
@@ -38,7 +40,7 @@ def validate_inputs(bucket_name: str, acl: str):
         raise HTTPException(status_code=400, detail="Invalid S3 bucket name")
 
 
-@app.post("/render")
+@app.post("/render", response_class=PlainTextResponse)
 def render(request: RenderRequest):
     props = request.payload.properties
 
@@ -59,4 +61,4 @@ resource "aws_s3_bucket_acl" "bucket_acl" {{
 }}
 """
 
-    return {"terraform": terraform}
+    return terraform.strip()
