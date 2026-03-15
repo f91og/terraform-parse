@@ -55,8 +55,13 @@ variable "node_max_size" {
   default     = 3
 }
 
-variable "bucket_acl" {
-  description = "ACL applied to the S3 bucket"
+variable "cluster_version" {
+  description = "Desired Kubernetes control-plane version"
   type        = string
-  default     = "public-read"
+  default     = "1.29"
+
+  validation {
+    condition     = can(regex("^1\\.[0-9]+$", var.cluster_version))
+    error_message = "Cluster version must be a valid Kubernetes version."
+  }
 }
