@@ -1,49 +1,94 @@
-<div align="center">
-   <img src="/img/logo.svg?raw=true" width=600 style="background-color:white;">
-</div>
+# Terraform Parse Service
 
-# SRE Technical Take-Home Assignment : Terraform-Parse (Terraform + Helm)
+A minimal FastAPI service that turns a JSON payload describing an AWS S3 bucket into a Terraform snippet. It is intended as a building block for tools that need to generate infrastructure templates programmatically.
 
-Welcome to the Tripla SRE take-home assignment! 🧑‍💻 This exercise is designed to simulate a real-world scenario where you'll tackle challenges across infrastructure, platform engineering, and automation.
+## Requirements
 
-⚠️ **Before you begin**, please review the main [FAQ](/README.md#frequently-asked-questions). It contains important information, **including our specific guidelines on how to submit your solution.**
+- Python 3.13
+- [uv](https://docs.astral.sh/uv/) (recommended) or `pip`
 
-## Repo structure
-- `terraform/` : Terraform code (intentionally imperfect) for an EKS cluster and an S3 bucket .
-- `helm/` : A Helm chart (intentionally buggy) that deploys an API service .
+## Setup
 
-## Candidate Tasks
-### Create `Terraform-Parse` Service
-1. Please Create a backend service to render an API request into terraform file
-   (You can use any language/framework you’re comfortable with (e.g., Python/Flask, Node/Express, Go/Fiber). Keep it minimal.)
-2. Service needs to receive rest api request (`POST` method) with certain payload.
-    ```
-    {
-    "payload":{
-        "properties":{
-            "aws-region":"eu-west-1",
-            "acl":"private",
-            "bucket-name": "tripla-bucket"
+```bash
+# Recommended install using uv
+uv sync --all-groups
+
+# or with pip
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+## Running the API
+
+Start the development server with reload support:
+
+```bash
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+The app exposes a single endpoint: `POST /render`.
+
+### Sample request
+
+```bash
+# render response to yaml file
+curl -X POST http://localhost:8000/render \
+  -H "Content-Type: application/json" \
+  -d '{
+        "payload": {
+          "properties": {
+            "aws-region": "ap-southeast-1",
+            "acl": "private",
+            "bucket-name": "my-generated-bucket"
+          }
         }
-    }
-    }
-    ```
-3. Parse this payload and and programmatically generate a valid Terraform configuration file (.tf) for S3 bucket creation. Resources created should at least include:
-    - provider
-    - aws_s3_bucket
-    - aws_s3_bucket_acl
-4. Please put your code to folder `terraform_parse_service`
+      }' > main.tf
+```
 
-### Infrastructure (Terraform)
-5. You have provided a set of Terraform code to create an EKS. Please review the code, identify issues or design flaws.
-6. Adjust or refactor be safe and maintainable for multiple environments.
+## Project layout
 
-### Platform (Kubernetes + Helm)
-7. You are provided a set of Helm code. Please review and deploy `Terraform-Parse` service into a Kubernetes cluster using the provided Helm setup (local kind/minikube is fine).
-8. Debug and fix if you find services don't route properly.
-9. Improve other aspects as you see fit.
+- `app/main.py` # FastAPI application with the `/render` endpoint.
+- `pyproject.toml` # project metadata and dependencies.
+- `tests/` # unit tests
+- `uv.lock` # dependency lock file
 
-## Minimum Deliverables
-1.  A link to your Git repository containing the complete solution.
-2.  Clear instructions in the `README.md` on how to build, test, and run your service.
-3. `NOTES.md` with explanations for API service creation, Terraform fixes, Helm fixes, multi-env thoughts, and any AI usage.
+## Run test cases
+
+```bash
+uv run pytest
+```
+
+## Local Testing with Kind
+```
+# 1 Create Kubernetes cluster
+kind create cluster --name tripla-test
+
+# 2 Build Docker image under folder root
+export IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+docker build -t terraform-parse:$IMAGE_TAG
+
+
+### 3 Load image into kind or push to your image repository
+kind load docker-image terraform-parse:$IMAGE_TAG --name tripla-test
+
+### 4 Deploy Helm chart
+helm lint ./helm
+helm upgrade -i terraform-parse ./helm \
+  --set image.repository=terraform-parse \
+  --set image.tag=$IMAGE_TAG
+
+### 5 Verify deployment
+kubectl get pods
+kubectl get svc
+
+### 6 Access the API
+kubectl port-forward svc/terraform-parse 8000:8000
+
+Then open:
+http://localhost:8000/docs
+```
+
+## Notes
+
+- The service currently supports only AWS S3 bucket configuration. Extend `app/main.py` with additional models and template logic for more resource types.
