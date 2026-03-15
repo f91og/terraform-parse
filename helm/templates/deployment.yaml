@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: terraform-parse
+  name: "{{ .Release.Name }}"
   labels:
-    app: terraform-parse
+    app: "{{ .Release.Name }}"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: terraform-parse
+      app: "{{ .Release.Name }}"
   template:
     metadata:
       labels:
-        app: terraform-parse
+        app: "{{ .Release.Name }}"
     spec:
       containers:
         - name: terraform-parse

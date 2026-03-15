@@ -64,7 +64,7 @@ kind load docker-image terraform-parse:$IMAGE_TAG --name tripla-test
 
 # Deploy Helm chart
 helm lint ./helm
-helm upgrade -i terraform-parse ./helm \
+helm upgrade -i terraform-parse-dev ./helm \
   --set image.repository=terraform-parse \
   --set image.tag=$IMAGE_TAG
 
@@ -73,7 +73,7 @@ kubectl get pods
 kubectl get svc
 
 # Access the API
-kubectl port-forward svc/terraform-parse 8000:8000
+kubectl port-forward svc/terraform-parse-dev 8000:8000
 
 # Then open:
 http://localhost:8000/

@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: terraform-parse
+  name: "{{ .Release.Name }}"
   labels:
-    app: terraform-parse
+    app: "{{ .Release.Name }}"
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: terraform-parse
+    app: "{{ .Release.Name }}"
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 8000
