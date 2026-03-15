@@ -81,7 +81,7 @@ kind load docker-image terraform-parse:$IMAGE_TAG --name tripla-test
 
 ### 4 Deploy Helm chart
 helm lint ./helm
-helm install terraform-parse ./helm \
+helm upgrade -i terraform-parse ./helm \
   --set image.repository=terraform-parse \
   --set image.tag=$IMAGE_TAG
 
